@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 void main() {
   runApp(const MyApp());
@@ -32,9 +33,11 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String _displayText = 'Flutter Demo';
   bool _isSwitched = false;
+  Color _backgroundColor = Colors.white;
 
   final TextEditingController _counterController = TextEditingController();
   final TextEditingController _displayController = TextEditingController();
+  final Random _random = Random();
 
   void _incrementCounter() {
     setState(() {
@@ -74,6 +77,15 @@ class _MyHomePageState extends State<MyHomePage> {
       _isSwitched = value;
     });
   } // 是否更改标题的开关
+   
+  Color _randomColor() {
+    return Color.fromRGBO(
+      _random.nextInt(256),
+      _random.nextInt(256),
+      _random.nextInt(256),
+      1,
+    );
+  } // 生成随机颜色
 
   @override
   Widget build(BuildContext context) {
@@ -82,83 +94,111 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(_displayText),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Switch(
-              value: _isSwitched,
-              onChanged: _toggleSwitch,
-            ),
-            // ignore: prefer_const_constructors
-            SizedBox(height: 20),
-            if (_isSwitched) ...[
+      body: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        color: _backgroundColor,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Switch(
+                value: _isSwitched,
+                onChanged: _toggleSwitch,
+              ),
+              
+              SizedBox(height: 20),
+              if (_isSwitched) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
+                  child: TextField(
+                    controller: _displayController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '更改顶部文本',
+                    ),
+                    onSubmitted: (_) => _setDisplayText(),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _setDisplayText,
+                  child: const Text('更新标题'),
+                ),
+                // ignore: prefer_const_constructors
+                SizedBox(height: 20),
+              ],
+
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20), 
+                child: Text(
+                  data,
+                  // ignore: prefer_const_constructors
+                  style: TextStyle(
+                    fontSize: 22, 
+                  ),
+                ),
+              ),
+
+              Text(
+                '$_counter',
+                style: Theme.of(context).textTheme.headline4,
+              ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
                 child: TextField(
-                  controller: _displayController,
+                  controller: _counterController,
+                  keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: '更改顶部文本',
+                    labelText: '设置一个数字',
                   ),
-                  onSubmitted: (_) => _setDisplayText(),
+                  onSubmitted: (_) => _setCounter(),
                 ),
               ),
+
+              ButtonBar(
+                alignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: _decrementCounter,
+                    child: const Icon(Icons.remove),
+                  ),
+                  ElevatedButton(
+                    onPressed: _incrementCounter,
+                    child: const Icon(Icons.add),
+                  ),
+                  ElevatedButton(
+                    onPressed: _resetCounter,
+                    child: const Icon(Icons.refresh),
+                  ),
+                ],
+              ),
+
               ElevatedButton(
-                onPressed: _setDisplayText,
-                child: const Text('更新标题'),
+                onPressed: _setCounter,
+                child: const Text('设置计数器'),
               ),
-              // ignore: prefer_const_constructors
-              SizedBox(height: 20),
+
+              Slider(
+                value: _backgroundColor.opacity,
+                onChanged: (newOpacity) {
+                  setState(() {
+                    _backgroundColor = _backgroundColor.withOpacity(newOpacity);
+                  });
+                },
+              ),
+
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _backgroundColor = _randomColor();
+                  });
+                },
+                child: const Text('更改背景色'),
+              ),
+
             ],
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20), 
-              child: Text(
-                data,
-                // ignore: prefer_const_constructors
-                style: TextStyle(
-                  fontSize: 22, 
-                ),
-              ),
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
-              child: TextField(
-                controller: _counterController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: '设置一个数字',
-                ),
-                onSubmitted: (_) => _setCounter(),
-              ),
-            ),
-            ButtonBar(
-              alignment: MainAxisAlignment.center,
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: _decrementCounter,
-                  child: const Icon(Icons.remove),
-                ),
-                ElevatedButton(
-                  onPressed: _incrementCounter,
-                  child: const Icon(Icons.add),
-                ),
-                ElevatedButton(
-                  onPressed: _resetCounter,
-                  child: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: _setCounter,
-              child: const Text('设置计数器'),
-            ),
-          ],
+          ),
         ),
       ), 
     );
